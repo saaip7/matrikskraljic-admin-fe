@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
@@ -14,29 +14,41 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { env } from "@/config/env"
-import type { Requisition } from "@/types"
+import { env } from "../../config/env"
+import type { Requisition } from "../../types"
+import type { Project } from "../../types/index"
 
-export function RequisitionTable({
-  projectId,
-  requisitions = [],
-}: {
-  projectId: string
-  requisitions?: Requisition[]
-}) {
+export function RequisitionTable({ project }: { project: Project }) {
   const router = useRouter()
   const [isDeleting, setIsDeleting] = useState(false)
   const [requisitionToDelete, setRequisitionToDelete] = useState<Requisition | null>(null)
+  const [requisitions, setRequisitions] = useState<Requisition[]>([])
+
+  useEffect(() => {
+    async function fetchRequisitions() {
+      try {
+        const response = await fetch(`${env.BACKEND_URL}/api/task/${project.projectid}`)
+        if (!response.ok) throw new Error("Failed to fetch requisitions")
+        const data = await response.json()
+        setRequisitions(data)
+      } catch (error) {
+        console.error("Error fetching requisitions:", error)
+      }
+    }
+
+    fetchRequisitions()
+  }, [project.projectid])
 
   async function deleteRequisition(requisition: Requisition) {
     try {
       setIsDeleting(true)
-      const response = await fetch(`${env.BACKEND_URL}/requisitions/${requisition.id}`, {
+      const response = await fetch(`${env.BACKEND_URL}/requisitions/${requisition.projectid}`, {
         method: "DELETE",
       })
 
       if (!response.ok) throw new Error("Failed to delete requisition")
 
+      setRequisitions((prev) => prev.filter((r) => r.taskid !== requisition.taskid))
       router.refresh()
     } catch (error) {
       console.error("Error deleting requisition:", error)
@@ -68,9 +80,9 @@ export function RequisitionTable({
               </TableRow>
             ) : (
               requisitions.map((requisition) => (
-                <TableRow key={requisition.id}>
-                  <TableCell>{requisition.requisitionNo}</TableCell>
-                  <TableCell>{requisition.sowDesc}</TableCell>
+                <TableRow key={requisition.taskid}>
+                  <TableCell>{requisition.requisitionno}</TableCell>
+                  <TableCell>{requisition.sowdesc}</TableCell>
                   <TableCell>{requisition.discipline}</TableCell>
                   <TableCell>{requisition.procurement}</TableCell>
                   <TableCell className="text-right">
@@ -111,4 +123,3 @@ export function RequisitionTable({
     </>
   )
 }
-

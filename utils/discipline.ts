@@ -1,4 +1,4 @@
-import type { Discipline, ProjectRole } from "@/types"
+import type { Discipline, ProjectRole } from "../types"
 
 export const disciplines: Discipline[] = ["Civil", "Electrical", "Piping", "Instrument", "Mechanical", "Logistic"]
 

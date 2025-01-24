@@ -10,8 +10,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
-import { env } from "@/config/env"
-import type { Project } from "@/types"
+import { env } from "../../config/env"
+import type { Project } from "../../types"
 
 const formSchema = z.object({
   requisitionNo: z.string().min(1, "Requisition number is required"),
@@ -42,7 +42,7 @@ export function RequisitionForm({ project }: { project: Project }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...values,
-          projectId: project.id,
+          projectId: project.projectid,
         }),
       })
 

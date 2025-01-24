@@ -4,54 +4,73 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
+import { useToast } from "@/hooks/use-toast"
 import * as z from "zod"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
-import { disciplines, getDisciplineRole } from "@/utils/discipline"
-import { env } from "@/config/env"
+import { disciplines, getDisciplineRole } from "../../utils/discipline"
+import { env } from "../../config/env"
 
 const formSchema = z.object({
-  projectCode: z.string().min(1, "Project code is required"),
-  projectName: z.string().min(1, "Project name is required"),
+  projectcode: z.string().min(1, "Project code is required"),
+  projectname: z.string().min(1, "Project name is required"),
   discipline: z.enum(["Civil", "Electrical", "Piping", "Instrument", "Mechanical", "Logistic"]),
-  projectRole: z.string(),
+  projectrole: z.string(),
 })
 
 export function ProjectForm() {
   const router = useRouter()
+  const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      projectCode: "",
-      projectName: "",
+      projectcode: "",
+      projectname: "",
       discipline: "Civil",
-      projectRole: "Civil Engineer",
+      projectrole: "Civil Engineer",
     },
   })
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       setIsLoading(true)
-      const response = await fetch(`${env.BACKEND_URL}/projects`, {
+      const response = await fetch(`${env.BACKEND_URL}/api/projects`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...values,
-          // projectRole: getDisciplineRole(values.discipline),
+          projectrole: getDisciplineRole(values.discipline),
         }),
       })
 
-      if (!response.ok) throw new Error("Failed to create project")
+      console.log("Request body:", JSON.stringify({
+        ...values,
+      }))
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.message || "Failed to create project")
+      }
+      toast({
+        title: "Success",
+        description: "Project created successfully",
+      })
+
 
       form.reset()
       router.refresh()
     } catch (error) {
       console.error("Error creating project:", error)
+      toast({
+        title: "Error",
+        description: (error instanceof Error ? error.message : "Failed to create project. Please try again."),
+        variant: "destructive",
+      })
     } finally {
       setIsLoading(false)
     }
@@ -68,7 +87,7 @@ export function ProjectForm() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
-                name="projectCode"
+                name="projectcode"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Project Code</FormLabel>
@@ -81,7 +100,7 @@ export function ProjectForm() {
               />
               <FormField
                 control={form.control}
-                name="projectName"
+                name="projectname"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Project Name</FormLabel>
@@ -118,7 +137,7 @@ export function ProjectForm() {
               />
               <FormField
                 control={form.control}
-                name="projectRole"
+                name="projectrole"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Project Role</FormLabel>

@@ -9,18 +9,18 @@ export type ProjectRole =
   | "Logistic Engineer"
 
 export type Project = {
-  id: string
-  projectCode: string
-  projectName: string
+  projectid: number
+  projectcode: string
+  projectname: string
   discipline: Discipline
-  projectRole: ProjectRole
+  projectrole: ProjectRole
 }
 
 export type Requisition = {
-  id: string
-  projectId: string
-  requisitionNo: string
-  sowDesc: string
+  taskid: number
+  projectid: number
+  requisitionno: string
+  sowdesc: string
   discipline: Discipline
   procurement: "Procurement" | "Subcontracting"
 }
