@@ -5,9 +5,24 @@ import type { Project } from "../../types"
 import { Breadcrumb } from "@/components/breadcrumb"
 
 async function getProjects(): Promise<Project[]> {
-  const res = await fetch(`${env.BACKEND_URL}/api/projects`, { method: "GET" })
-  if (!res.ok) throw new Error("Failed to fetch projects")
-  return res.json()
+  try {
+    const res = await fetch(`${env.BACKEND_URL}/api/projects`, { 
+      method: "GET",
+      next: {
+        revalidate: 3600 // Revalidate every hour
+      }
+    })
+    
+    if (!res.ok) {
+      console.error(`Failed to fetch projects: ${res.status}`)
+      return []
+    }
+    
+    return res.json()
+  } catch (error) {
+    console.error('Error fetching projects:', error)
+    return []
+  }
 }
 
 export default async function Page() {
@@ -25,4 +40,3 @@ export default async function Page() {
     </div>
   )
 }
-
