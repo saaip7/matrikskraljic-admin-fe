@@ -78,7 +78,7 @@ export function ProjectTable({ projects }: { projects: Project[] }) {
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
                       <Button variant="outline" asChild>
-                        <Link href={`/${project.projectid}`}>Insert Requisition List</Link>
+                        <Link href={`/projects/${project.projectid}`}>Insert Requisition List</Link>
                       </Button>
                       <Button variant="destructive" onClick={() => setProjectToDelete(project)} disabled={isDeleting}>
                         <Trash2/>
